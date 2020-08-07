@@ -139,3 +139,15 @@ def test_append_and_save():
 def test_has_entry():
     S = SheetObject('testbook.xlsx','Sheet1')
     assert S.has_entry({'name':'joe', 'age':1, 'rank':'captain'})==True
+    
+def test_get_with_index():
+    S = SheetObject('testbook.xlsx','Sheet1')
+    result = S.get_with_index({'name':'joe', 'age':1, 'rank':'captain'})
+    answer = [[{'name':'joe', 'age':1, 'rank':'captain'}],[2]]
+    assert result == answer
+    
+def test_replace():
+    S = SheetObject('testbook.xlsx','Sheet1')
+    new_entry = {'name':'christelle', 'age':36, 'rank':'full professor'}
+    S.replace({'name':'joe', 'age':1, 'rank':'captain'},new_entry)
+    assert (S.has_entry({'name':'joe', 'age':1, 'rank':'captain'}))==False and (S.has_entry(new_entry)==True)

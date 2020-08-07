@@ -1,5 +1,8 @@
-from table_functions import *
+#from .table_functions import *
 from openpyxl import *
+
+def is_subdictionary(A,B):
+    return set(A.items()).issubset(B.items())
 
 class SheetObject:
     """
@@ -27,6 +30,7 @@ class SheetObject:
         self._sheet = self._workbook[self.sheetname]
         self.keys = []
         self.column_dict = {}
+
         j=0
         for value in self._sheet.iter_cols(min_row=1, max_row=1,values_only=True):
             self.keys.append(value[0])
@@ -71,8 +75,10 @@ class SheetObject:
         else:
             raise ValueError('entry keys do not match spreadsheet headings')
             
-            
-    def get(self,partial_entry):
+    
+    
+    
+    def get_with_index(self,partial_entry):
         """
         --INPUT: partial_entry is a dictionary which has a subset of self.keys for entries.
         --OUTPUT: this function will return all the elements of the spreadsheet as dictionaries whose entries matches those that we searched for.
@@ -87,20 +93,27 @@ class SheetObject:
             entry_keys = partial_entry.keys()
             
             matches = []
+            indices = []
             
+            i=1
             for row in self._sheet.iter_rows(min_row=2,values_only=True):
-                
+                i=i+1
                 #first convert the row to a dictionary
                 row_as_dictionary = self.row_as_list_to_dict(row)
                 
                 #if the row is a match, throw the dictionary into the list of matches
                 if is_subdictionary(partial_entry,row_as_dictionary):
                     matches.append(row_as_dictionary)
-                    
-            return matches
+                    indices.append(i)
+            
+            #print([matches,indices])
+            return [matches,indices]
             
         else:
             raise ValueError('is_valid_entry returns %s' % X)
+            
+    def get(self,entry):
+        return self.get_with_index(entry)[0]
             
     def get_all(self):
         """
@@ -115,6 +128,13 @@ class SheetObject:
         all dictionaries must match all the keys.
         """
         
+        entries_with_index = self.get_with_index(entries)
+        print('getting entries with index \n')
+        print(entries_with_index)
+        return entries_with_index[1]
+        
+        
+        
         raise NotImplementedError("Didn't get to this yet")
         
     def get_by_excel_row_index(self,x):
@@ -127,6 +147,22 @@ class SheetObject:
             row[self.keys[j]]=value[0]
             j=j+1
         return row
+        
+    def replace(self,old_entry,new_entry, is_subentry=False):
+        if is_subentry==True:
+            keep_going = is_subdictionary(old_entry,new_entry)
+            if not keep_going:
+                raise ValueError("The new entry does not extend the old entry")
+                
+        search_result = self.get(old_entry)
+        n=len(search_result)
+        if n==1:
+            self.remove(entries=[old_entry])
+            self.append(new_entry)
+            return "The entry has been updated. Remember to save!"
+        else:
+            raise ValueError("the old entry you gave is not unique!")
+        
     
     
     def remove(self, entries=[], list_of_row_indices=[]):
@@ -136,27 +172,40 @@ class SheetObject:
         n = len(list_of_row_indices)
         m = len(entries)
         
-        if (n!=0) and (m!=0):
+        if (m!=0) and (n!=0):
             raise ValueError("input must be a list of dictionaries or a list of row indices but not both")
         
         elif n!=0 and m==0:
-            sorted_indices_for_deletion = sorted(list_of_row_indices).reverse() #remove large to small indices so
+            print("removing the following: %s" % list_of_row_indices)
+            #print(list_of_row_indices)
+            
+            sorted_indices_for_deletion = sorted(list_of_row_indices, reverse=True) #remove large to small indices so
+            #if len(sorted_indices_for_deletion)==0:
+            #    return "no rows were deleted."
+            #else:
             for i in sorted_indices_for_deletion:
                 self._sheet.delete_rows(idx=i)
                 
+            print('all: %s' % self.get_all())
             return "rows have been removed"
                 
         elif n==0 and m!=0:
+            #print(m)
+            #print(entries)
             
-            list_or_row_ind = []
+            list_of_row_ind = []
             
             for entry in entries:
                 
-                if is_valid_entry(entry,is_full=True)==False:
+                if self.is_valid_entry(entry,is_full=True)==False:
                     raise ValueError("all entries must specify a complete set of keys")
                 
-                list_of_row_ind.append(self.get_index(entry))
                 
+                myindex = self.get_index(entry)[0]
+                print('index: %s ' % myindex)
+                list_of_row_ind.append(myindex)
+                
+            print('list: %s' % list_of_row_ind)
             self.remove(list_of_row_indices=list_of_row_ind)
             
     def number_of_entries(self):
@@ -185,7 +234,7 @@ class SheetObject:
             
     def has_entry(self,mydict):
         """
-        Given a dictionary mydict, search the spreadsheet to see if this exact same entry already exists.
+        Given a dictionary mydict, search the spreadsheet to see if this exact same entry already exists. ON THE NOSE!
         """
         if self.is_valid_entry(mydict):
             matching_entries = self.get(mydict)
