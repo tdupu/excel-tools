@@ -1,7 +1,7 @@
 import sys
 #sys.path.append('/Library/Python/3.7/site-packages/zulip_bots/bots/roboshep/table_functions')
 #sys.path.append('/Library/Python/3.7/site-packages/zulip_bots/bots/roboshep/table_editor')
-sys.path.append('/Library/Python/3.7/site-packages/zulip_bots/bots/roboshep')
+#sys.path.append('/Library/Python/3.7/site-packages/zulip_bots/bots/roboshep')
 
 from mod_functions import *
 from table_editor import *

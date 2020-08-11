@@ -73,7 +73,7 @@ class SheetObject:
                 #self.save() #appears after this function, I don't remember if this matters.
             
         else:
-            raise ValueError('entry keys do not match spreadsheet headings')
+            raise ValueError('Append failed. Entry keys do not match .xlsx keys.')
             
     
     
@@ -85,7 +85,8 @@ class SheetObject:
     
         (If you pass an empty dict, it should give you all the entries as a dictionary)
         """
-        X = self.is_valid_entry(partial_entry)
+        a = partial_entry
+        X = self.is_valid_entry(a)
         
         if X:
         #Y=True
@@ -110,7 +111,7 @@ class SheetObject:
             return [matches,indices]
             
         else:
-            raise ValueError('is_valid_entry returns %s' % X)
+            raise ValueError(f'\n {partial_entry} is not a valid entry')
             
     def get(self,entry):
         return self.get_with_index(entry)[0]
@@ -129,8 +130,8 @@ class SheetObject:
         """
         
         entries_with_index = self.get_with_index(entries)
-        print('getting entries with index \n')
-        print(entries_with_index)
+        #print('getting entries with index \n')
+        #print(entries_with_index)
         return entries_with_index[1]
         
         
@@ -153,15 +154,17 @@ class SheetObject:
             keep_going = is_subdictionary(old_entry,new_entry)
             if not keep_going:
                 raise ValueError("The new entry does not extend the old entry")
-                
-        search_result = self.get(old_entry)
+        
+        search_result = [entry for entry in self.get(old_entry)]
         n=len(search_result)
         if n==1:
-            self.remove(entries=[old_entry])
+            self.remove(entries=search_result)
             self.append(new_entry)
             return "The entry has been updated. Remember to save!"
-        else:
-            raise ValueError("the old entry you gave is not unique!")
+        if n==0:
+            raise ValueError("Cannot replace. No such entry.")
+        if n>0:
+            raise ValueError("Cannot replace. There is not a unique entry for this query.")
         
     
     
@@ -176,7 +179,7 @@ class SheetObject:
             raise ValueError("input must be a list of dictionaries or a list of row indices but not both")
         
         elif n!=0 and m==0:
-            print("removing the following: %s" % list_of_row_indices)
+            #print("removing the following: %s" % list_of_row_indices)
             #print(list_of_row_indices)
             
             sorted_indices_for_deletion = sorted(list_of_row_indices, reverse=True) #remove large to small indices so
@@ -186,7 +189,7 @@ class SheetObject:
             for i in sorted_indices_for_deletion:
                 self._sheet.delete_rows(idx=i)
                 
-            print('all: %s' % self.get_all())
+            #print('all: %s' % self.get_all())
             return "rows have been removed"
                 
         elif n==0 and m!=0:
@@ -202,10 +205,10 @@ class SheetObject:
                 
                 
                 myindex = self.get_index(entry)[0]
-                print('index: %s ' % myindex)
+                #print('index: %s ' % myindex)
                 list_of_row_ind.append(myindex)
                 
-            print('list: %s' % list_of_row_ind)
+            #print('list: %s' % list_of_row_ind)
             self.remove(list_of_row_indices=list_of_row_ind)
             
     def number_of_entries(self):
