@@ -68,12 +68,22 @@ class SheetObject:
         """
         if self.is_valid_entry(new_entry):
             if not self.has_entry(new_entry):
+                """
+                print("column dict: %s \n <br>" % self.column_dict)
+                """
                 new_row = [new_entry[self.column_dict[i+1]] for i in range(self.number_of_keys)]
                 self._sheet.append(new_row)
                 #self.save() #appears after this function, I don't remember if this matters.
             
         else:
-            raise ValueError('Append failed. Entry keys do not match .xlsx keys.')
+            A = set(new_entry.keys())
+            B = self.set_of_keys
+            C = A.symmetric_difference(B)
+            message = "symmetric difference of keys: \n"
+            for c in C:
+                message = message + ("%s \n" % c)
+
+            raise ValueError("Append failed. Entry keys do not match .xlsx keys. \n" + message)
             
     
     
