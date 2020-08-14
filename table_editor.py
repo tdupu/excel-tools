@@ -1,5 +1,5 @@
-#from .table_functions import *
 from openpyxl import *
+from table_functions import *
 
 def is_subdictionary(A,B):
     return set(A.items()).issubset(B.items())
@@ -260,3 +260,10 @@ class SheetObject:
             
         else:
             raise ValueError("dictionary keys do not match column headings in the spreadsheet")
+            
+    def set(sub,key,entry):
+        newsub=copyd(sub)
+        newsub[key]=entry
+        self.replace(sub,newsub)
+        return "entry for '%s': %s -> %s" % (key,sub[key],entry)
+         

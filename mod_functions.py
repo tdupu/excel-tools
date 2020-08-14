@@ -7,38 +7,6 @@ principals -- list of user_id's or zulip_email's
 
 """
 
-import re
-
-def match_key(list_of_dicts, my_key, my_value):
-    """
-    my_key needs to be a string
-    my_value is anything
-    """
-    possibles =[]
-    for dict0 in list_of_dicts:
-        if dict0[my_key] == my_value:
-            possibles.append(dict0)
-    return possibles
-    
-    
-def make_inclusive_search_key(words):
-    """
-    >>> words = ['apple','banana','c']
-    >>> key=make_inclusive_search_key(words)
-    "^(apple|banana|c)"
-    >>> re.search(key,"copper")
-    True
-    
-    we could have also used "starts with"
-    """
-    search_key = "("
-    n = len(words)
-    for i in range(n-1):
-        search_key = search_key + words[i]+ "|"
-    search_key = "^"+search_key+words[n-1]+")"
-    return search_key
-
-
 #######################
         
 def subscribe_usergroup_to_stream(my_user_group,my_stream):
@@ -73,6 +41,5 @@ def mod_subscribe_usergroup_to_stream(mygroupname,mystreamname):
     subscribe_usergroup_to_stream(my_user_group,mystreamname)
 
 
-    
 
             
