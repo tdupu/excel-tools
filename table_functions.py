@@ -19,7 +19,7 @@ def match_key(list_of_dicts, my_key, my_value):
 def kill_repeats(mylist):
     newlist = []
     for x in mylist:
-        if newlist.count(x)=0:
+        if newlist.count(x)==0:
             newlist.append(x)
     return newlist
     
@@ -51,29 +51,40 @@ def copyd(oldd):
     return newd
 
 def dicts_by_key(keys,X):
-    """
-    INPUT:
-    --X a list of dictionaries X all with the same key values
-    --keys, a subset of keys of the dictionaries
-    OUTPUT: [vals,dictX]
-    --vals, all the possible values of [x[k] for k in keys] and x in X
-    --dictX a dictionary of lists, where
-        dictX[v] = [all dictionaries of where [x[k] for k in keys] = v]
-    """
-    dictX = {}
-    vals = []
-    for x in X:
-        p = [x[k] for k in keys]
-        
-        if vals.count(p)==0:
-            vals.append(p)
-        
-        if dictX[p]==None:
-            dictX[p] = []
-            dictX[p].append(x)
-        else:
-            dictX[p].append(x)V
-    return vals,dictX
+   """
+   INPUT:
+   --X a list of dictionaries X all with the same key values
+   --keys, a subset of keys of the dictionaries
+   OUTPUT: [vals,dictX]
+   --vals, all the possible values of [x[k] for k in keys] and x in X
+   --dictX a dictionary of lists, where
+       dictX[v] = [all dictionaries of where [x[k] for k in keys] = v]
+       
+       mydict1 = {"a":1, "b":2, "c":3,}
+       mydict2 = {"a":1, "b":2, "c":4}
+       mydict3 = {"a":1, "b":3, "c":5}
+       mydicts = [mydict1,mydict2,mydict3]
+       dicts_by_key(["a","b"], mydicts)
+       ([(1, 2), (1, 3)],{(1, 2): [{'a': 1, 'b': 2, 'c': 3}, {'a': 1, 'b': 2, 'c': 3}, {'a': 1, 'b': 2, 'c': 4}], (1, 3): [{'a': 1, 'b': 3, 'c': 5}, {'a': 1, 'b': 3, 'c': 5}]})
+   """
+   dictX = {}
+   vals = []
+   for x in X:
+       #this needs to be hashable
+       p = tuple([x[k] for k in keys])
+       
+       if vals.count(p)==0:
+           vals.append(p)
+       
+       try:
+           dictX[p]
+       except KeyError as e:
+           dictX[p] = []
+           dictX[p].append(x)
+       finally:
+           dictX[p].append(x)
+           
+   return vals,dictX
 
 """
 This function isn't used here but I want to use it in Zulip for

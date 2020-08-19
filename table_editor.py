@@ -165,7 +165,7 @@ class SheetObject:
             if not keep_going:
                 raise ValueError("The new entry does not extend the old entry")
         
-        search_result = [entry for entry in self.get(old_entry)]
+        search_result = [entry for entry in self.get({'submission_number':old_entry['submission_number']})]
         n=len(search_result)
         if n==1:
             self.remove(entries=search_result)
@@ -261,7 +261,7 @@ class SheetObject:
         else:
             raise ValueError("dictionary keys do not match column headings in the spreadsheet")
             
-    def set(sub,key,entry):
+    def set_entry(self,sub,key,entry):
         newsub=copyd(sub)
         newsub[key]=entry
         self.replace(sub,newsub)
